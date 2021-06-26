@@ -2,6 +2,7 @@
 	require_once "pdo.php";
 	require_once "utill.php";
 
+	$url = "https://localhost/js/resume_final";
 	// if the user is not logged in redirect back to index.php
 	if (!isset($_SESSION['user_id'])) {
 		die("ACCESS DENIED");
@@ -9,7 +10,7 @@
 	}
 	// if the user requested cancel go back to index.php
 	if (isset($_POST['cancel'])) {
-		header("Location: index.php");
+		header("Location: $url/index.php");
 		return;
 	}
 
@@ -75,10 +76,11 @@
 		insertPosition($pdo, $_REQUEST['profile_id']);
 
 		// Clear out the old education entries
-		// $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
-		// $stmt->execute(array (':pid' => $_REQUEST['profile_id']));
+		$stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
+		$stmt->execute(array (':pid' => $_REQUEST['profile_id']));	
+
 		// Insert the Education entries
-		updateEducation($pdo, $_REQUEST['profile_id']);
+		insertEducation($pdo, $_REQUEST['profile_id']);
 
    		$_SESSION['success'] = "Profile updated";
    		header("Location: index.php");
@@ -123,8 +125,8 @@
 					$edu++;
 					echo('<div id="education'.$edu.'">');
 					echo('<p>Year: <input type="text" name="edu_year'.$edu.'" value="'.$school['year'].'"/>'."\n");
-					echo('<input type="button" value="-" onclick="$(\'#education'.$edu.'\').remove(); countEdu--; return false;"></p>'."\n");
-					echo('<p>Education: <input type="text" size="80" name="edu_desc.'.$edu.'" id="school" value="'.htmlentities($school['name']).'" />');
+					echo('<input type="button" value="-" name="remove" onclick="$(\'#education'.$edu.'\').remove(); return false;"></p>'."\n");
+					echo('<p>Education: <input type="text" size="80" name="edu_desc.'.$edu.'" class="school" value="'.htmlentities($school['name']).'" autocomplete = "off" />');
 					echo('</div>');
 					echo "<br>";
 				}
@@ -196,15 +198,15 @@
 	        $('#education_fields').append(source.replace(/@COUNT@/g,countEdu));
 		
 			// Add the even handler to the new ones
-	        $('#school').autocomplete({
+	        $('.school').autocomplete({
 	            source: "school.php"
 	        });
 
     	});	
-    	// Add the even handler to the new ones
-	    $('#school').autocomplete({
-	   		source: "school.php"
-		});
+  //   	// Add the even handler to the new ones
+	 //    $('#school').autocomplete({
+	 //   		source: "school.php"
+		// });
 
 	});
 	</script>	
@@ -213,8 +215,8 @@
 <script id="edu-template" type="text">
   <div id="education@COUNT@">
     <p>Year: <input type="text" name="edu_year@COUNT@" value="" />
-    <input type="button" value="-" onclick="$('#education@COUNT@').remove(); countEdu--; return false;"><br>
-    <p>Education: <input type="text" size="80" name="edu_desc@COUNT@" id="school" value="" />
+    <input type="button" value="-" name="remove" onclick="$('#education@COUNT@').remove(); countEdu--; return false;"><br>
+    <p>Education: <input type="text" size="80" name="edu_desc@COUNT@" class="school" value="" autocomplete = "off"/>
     </p>
   </div>
 </script>
