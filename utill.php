@@ -60,7 +60,7 @@ function loadPos($pdo, $profile_id) {
 	return $positions;
 }
 function LoadEdu($pdo, $profile_id) {
-	$stmt = $pdo->prepare('SELECT year, name FROM Education 
+	$stmt = $pdo->prepare('SELECT year, name, rank FROM Education 
 						JOIN Institution ON Education.institution_id = Institution.institution_id
 						WHERE profile_id = :pi ORDER by rank');
 	$stmt->execute(array(':pi' => $profile_id));

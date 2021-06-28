@@ -34,6 +34,10 @@
 		return;
 	}
 
+	// Load up the position and education rows
+	$positions = loadPos($pdo, $_REQUEST['profile_id']);
+	$schools = loadEdu($pdo, $_REQUEST['profile_id']);
+
 	// Handle the incoming data
 	if (isset($_POST['add'])) {
 
@@ -74,10 +78,13 @@
 		$stmt->execute(array (':pid' => $_REQUEST['profile_id']));
 		// Insert the Position entries
 		insertPosition($pdo, $_REQUEST['profile_id']);
-
-		// Clear out the old education entries
-		$stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
-		$stmt->execute(array (':pid' => $_REQUEST['profile_id']));	
+		foreach($schools as $school){
+			// Clear out the old education entries
+			if (isset($_POST['remove'])) {
+				$stmt = $pdo->prepare('DELETE FROM education WHERE profile_id=:pid');
+				$stmt->execute(array (':pid' => $school['rank']));	
+			}
+		}
 
 		// Insert the Education entries
 		insertEducation($pdo, $_REQUEST['profile_id']);
@@ -86,9 +93,6 @@
    		header("Location: index.php");
    		return;
 	}
-	// Load up the position and education rows
-	$positions = loadPos($pdo, $_REQUEST['profile_id']);
-	$schools = loadEdu($pdo, $_REQUEST['profile_id']);
 ?>
 
 <!DOCTYPE html>
@@ -125,10 +129,10 @@
 					$edu++;
 					echo('<div id="education'.$edu.'">');
 					echo('<p>Year: <input type="text" name="edu_year'.$edu.'" value="'.$school['year'].'"/>'."\n");
-					echo('<input type="button" value="-" name="remove" onclick="$(\'#education'.$edu.'\').remove(); return false;"></p>'."\n");
+					echo('<input type="button" value="-" name="remove'.$edu.'" onclick="$(\'#education'.$edu.'\').remove(); return false;"></p>'."\n");
 					echo('<p>Education: <input type="text" size="80" name="edu_desc.'.$edu.'" class="school" value="'.htmlentities($school['name']).'" autocomplete = "off" />');
 					echo('</div>');
-					echo "<br>";
+					// echo "<br>";
 				}
 			}
 			echo('</div></p>'."\n");
